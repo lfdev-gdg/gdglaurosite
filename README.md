@@ -73,9 +73,21 @@ public/assets/images
 
 ## Fluxo de branches
 
-- `main`: branch de produção. Só recebe merge vindo de `develop`. Todo push em `main` dispara o deploy automático para o canal `live` do Firebase Hosting.
-- `develop`: branch de integração. É para onde todo Pull Request deve ser aberto. Todo push em `develop` dispara a checagem de CI (typecheck + build).
+- `main`: branch de produção. Só recebe merge vindo de `develop`. Todo push em `main` dispara o deploy automático para o site de produção do Firebase Hosting.
+- `develop`: branch de integração. É para onde todo Pull Request deve ser aberto. Todo push em `develop` dispara a checagem de CI (typecheck + build) e o deploy automático para o site de staging.
 - `feature/*`, `fix/*`, `bug/*`: branches de trabalho, sempre criadas a partir de `develop`.
+
+## Ambientes
+
+O projeto Firebase `gdglaurosite` tem dois **Hosting sites** (definidos em `firebase.json` / `.firebaserc`), cada um com deploy automático a partir de uma branch diferente:
+
+| Ambiente   | Branch    | Site Firebase       | URL                                                                |
+| ---------- | --------- | -------------------- | ------------------------------------------------------------------- |
+| Produção   | `main`    | `gdglaurosite`        | https://gdglaurosite.web.app                                        |
+| Staging    | `develop` | `gdglaurosite-dev`    | https://gdglaurosite-dev.web.app                                    |
+| Preview PR | `feature/*` → PR para `develop`/`main` | `gdglaurosite-dev` (canal temporário) | link gerado automaticamente pelo bot do GitHub Actions no PR, expira em 7 dias |
+
+Os dois sites vivem no **mesmo projeto Firebase** (Firestore, Analytics etc. são compartilhados), só o Hosting é separado — não há custo adicional no plano Spark.
 
 ## Como abrir um Pull Request
 

@@ -1,14 +1,12 @@
-name: Deploy Preview (Pull Request)
+name: Deploy to Firebase Hosting (develop)
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
-      - main
 
 jobs:
-  build-and-preview:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +20,6 @@ jobs:
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+          channelId: live
           target: develop
           projectId: gdglaurosite
-          expires: 7d
