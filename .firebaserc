@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "gdglaurosite"
+  },
+  "targets": {
+    "gdglaurosite": {
+      "hosting": {
+        "production": [
+          "gdglaurosite"
+        ],
+        "develop": [
+          "gdglaurosite-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
