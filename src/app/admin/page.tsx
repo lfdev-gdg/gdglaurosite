@@ -5,6 +5,8 @@ import { addJob, getJobs, deleteJob } from '@/services/jobs'
 import { addProject, getProjects, deleteProject } from '@/services/projects'
 import type { Job, SocialProject } from '@/types/job'
 
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'gdglauro2026'
+
 type Tab = 'vagas' | 'projetos'
 
 export default function AdminPage() {
@@ -21,14 +23,14 @@ export default function AdminPage() {
 
   useEffect(() => {
     const stored = sessionStorage.getItem('admin_auth')
-    if (stored === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    if (stored === ADMIN_PASSWORD) {
       setAuthorized(true)
     }
   }, [])
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    if (password === ADMIN_PASSWORD) {
       sessionStorage.setItem('admin_auth', password)
       setAuthorized(true)
     } else {
