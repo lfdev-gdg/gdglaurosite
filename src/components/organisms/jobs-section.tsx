@@ -10,9 +10,27 @@ import { useFirestoreCollection } from '@/hooks/useFirestoreCollection'
 import type { Job } from '@/types/job'
 import type { FilterCriteria } from '@/lib/filters'
 
+const MOCK_JOBS: Job[] = [
+  { title: 'Desenvolvedor Frontend React', company: 'TechStart Brasil', level: 'Júnior', tech: 'React' },
+  { title: 'Engenheiro de Dados', company: 'DataFlow', level: 'Pleno', tech: 'Python' },
+  { title: 'Desenvolvedor Mobile Flutter', company: 'AppInova', level: 'Pleno', tech: 'Flutter' },
+  { title: 'Tech Lead Backend', company: 'CloudSys', level: 'Sênior', tech: 'Node.js' },
+]
+
+function MockBadge() {
+  return (
+    <span className="ml-2 inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+      Exemplo
+    </span>
+  )
+}
+
 export function JobsSection() {
   const [criteria, setCriteria] = useState<FilterCriteria>({})
-  const { data: jobs, loading } = useFirestoreCollection<Job>('jobs')
+  const { data: jobs, loading, error } = useFirestoreCollection<Job>('jobs')
+
+  const useMock = !loading && (error || jobs.length === 0)
+  const source = useMock ? MOCK_JOBS : jobs
 
   const filterContext = useMemo(() => {
     const ctx = new FilterContext<Job>()
@@ -21,8 +39,8 @@ export function JobsSection() {
   }, [])
 
   const filteredJobs = useMemo(
-    () => filterContext.execute(jobs, criteria),
-    [criteria, filterContext, jobs],
+    () => filterContext.execute(source, criteria),
+    [criteria, filterContext, source],
   )
 
   return (
@@ -31,6 +49,11 @@ export function JobsSection() {
         title="Vagas de Emprego"
         description="Oportunidades divulgadas pela comunidade. Conectamos talentos a empresas que contratam."
       >
+        {useMock && (
+          <div className="mt-3">
+            <MockBadge />
+          </div>
+        )}
         <FilterBar onFilterChange={setCriteria} showLevel />
       </SectionHeader>
 

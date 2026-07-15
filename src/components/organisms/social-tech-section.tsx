@@ -14,9 +14,29 @@ import Link from 'next/link'
 import type { SocialProject } from '@/types/job'
 import type { FilterCriteria } from '@/lib/filters'
 
+const MOCK_PROJECTS: SocialProject[] = [
+  {
+    title: 'GDG Lauro Talks',
+    description:
+      'Série de palestras e entrevistas com profissionais de tecnologia da comunidade local, abordando carreira, tendências e aprendizado.',
+    techs: ['Google Cloud', 'AI', 'Web'],
+  },
+]
+
+function MockBadge() {
+  return (
+    <span className="ml-2 inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+      Exemplo
+    </span>
+  )
+}
+
 export function SocialTechSection() {
   const [criteria, setCriteria] = useState<FilterCriteria>({})
-  const { data: projects, loading } = useFirestoreCollection<SocialProject>('socialProjects')
+  const { data: projects, loading, error } = useFirestoreCollection<SocialProject>('socialProjects')
+
+  const useMock = !loading && (error || projects.length === 0)
+  const source = useMock ? MOCK_PROJECTS : projects
 
   const filterContext = useMemo(() => {
     const ctx = new FilterContext<SocialProject>()
@@ -25,8 +45,8 @@ export function SocialTechSection() {
   }, [])
 
   const filteredProjects = useMemo(
-    () => filterContext.execute(projects, criteria),
-    [criteria, filterContext, projects],
+    () => filterContext.execute(source, criteria),
+    [criteria, filterContext, source],
   )
 
   return (
@@ -35,6 +55,11 @@ export function SocialTechSection() {
         title="SocialTech"
         description="Projetos sociais da comunidade que usam tecnologia para gerar impacto positivo. Envie sua ideia e colabore com a gente."
       >
+        {useMock && (
+          <div className="mt-3">
+            <MockBadge />
+          </div>
+        )}
         <FilterBar onFilterChange={setCriteria} />
       </SectionHeader>
 

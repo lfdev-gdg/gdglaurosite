@@ -10,9 +10,11 @@ import { getFirestoreInstance } from '@/lib/firebase'
 export function useFirestoreCollection<T>(collectionName: string) {
   const [data, setData] = useState<(T & { id: string })[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const fetchData = useCallback(() => {
     setLoading(true)
+    setError(false)
     const db = getFirestoreInstance()
     const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'))
 
@@ -27,6 +29,7 @@ export function useFirestoreCollection<T>(collectionName: string) {
         setLoading(false)
       },
       () => {
+        setError(true)
         setLoading(false)
       },
     )
@@ -41,5 +44,5 @@ export function useFirestoreCollection<T>(collectionName: string) {
     }
   }, [fetchData])
 
-  return { data, loading }
+  return { data, loading, error }
 }
