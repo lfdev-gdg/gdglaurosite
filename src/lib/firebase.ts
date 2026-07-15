@@ -1,4 +1,18 @@
-import { initializeApp, getApps } from 'firebase/app'
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import {
+  getFirestore,
+  type Firestore,
+  connectFirestoreEmulator,
+} from 'firebase/firestore'
+import {
+  getAuth,
+  type Auth,
+  connectAuthEmulator,
+} from 'firebase/auth'
+import {
+  getAnalytics,
+  type Analytics,
+} from 'firebase/analytics'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -9,6 +23,49 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+function getApp(): FirebaseApp {
+  if (getApps().length === 0) {
+    return initializeApp(firebaseConfig)
+  }
+  return getApps()[0]
+}
 
+let firestoreInstance: Firestore | null = null
+
+export function getFirestoreInstance(): Firestore {
+  if (!firestoreInstance) {
+    const app = getApp()
+    firestoreInstance = getFirestore(app)
+    if (process.env.NEXT_PUBLIC_USE_FIRESTORE_EMULATOR === 'true') {
+      connectFirestoreEmulator(firestoreInstance, 'localhost', 8080)
+    }
+  }
+  return firestoreInstance
+}
+
+let authInstance: Auth | null = null
+
+export function getAuthInstance(): Auth {
+  if (!authInstance) {
+    const app = getApp()
+    authInstance = getAuth(app)
+    if (process.env.NEXT_PUBLIC_USE_AUTH_EMULATOR === 'true') {
+      connectAuthEmulator(authInstance, 'http://localhost:9099')
+    }
+  }
+  return authInstance
+}
+
+let analyticsInstance: Analytics | null = null
+
+export function getAnalyticsInstance(): Analytics | null {
+  if (typeof window === 'undefined') return null
+  if (!analyticsInstance) {
+    const app = getApp()
+    analyticsInstance = getAnalytics(app)
+  }
+  return analyticsInstance
+}
+
+const app = getApp()
 export default app

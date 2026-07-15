@@ -1,8 +1,19 @@
-import { H2, P, H3 } from '@/components/atoms/typography'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+'use client'
 
-const projects = [
+import { useState, useMemo } from 'react'
+import { SectionTemplate } from '@/components/templates/section-template'
+import { SectionHeader } from '@/components/molecules/section-header'
+import { ProjectCard } from '@/components/molecules/project-card'
+import { FilterBar } from '@/components/molecules/filter-bar'
+import { P } from '@/components/atoms/typography'
+import { H3 } from '@/components/atoms/typography'
+import { Button } from '@/components/ui/button'
+import { ProjectsFilterStrategy, FilterContext } from '@/lib/filters'
+import Link from 'next/link'
+import type { SocialProject } from '@/types/job'
+import type { FilterCriteria } from '@/lib/filters'
+
+const projects: SocialProject[] = [
   {
     title: 'GDG Lauro Talks',
     description:
@@ -12,56 +23,58 @@ const projects = [
 ]
 
 export function SocialTechSection() {
+  const [criteria, setCriteria] = useState<FilterCriteria>({})
+
+  const filterContext = useMemo(() => {
+    const ctx = new FilterContext<SocialProject>()
+    ctx.addStrategy(new ProjectsFilterStrategy())
+    return ctx
+  }, [])
+
+  const filteredProjects = useMemo(
+    () => filterContext.execute(projects, criteria),
+    [criteria, filterContext],
+  )
+
   return (
-    <section id="socialtech" className="border-t border-border bg-card/50 py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <H2>SocialTech</H2>
-          <P className="mt-4">
-            Projetos sociais da comunidade que usam tecnologia para gerar impacto positivo.
-            Envie sua ideia e colabore com a gente.
+    <SectionTemplate id="socialtech">
+      <SectionHeader
+        title="SocialTech"
+        description="Projetos sociais da comunidade que usam tecnologia para gerar impacto positivo. Envie sua ideia e colabore com a gente."
+      >
+        <FilterBar onFilterChange={setCriteria} />
+      </SectionHeader>
+
+      <div className="mt-16 grid gap-8 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+          <H3 className="mb-4">Envie sua ideia</H3>
+          <P className="text-sm">
+            Tem uma ideia de projeto social usando tecnologia? Compartilhe conosco e
+            vamos construir juntos algo incrível para a comunidade.
           </P>
+          <Button className="mt-6" asChild>
+            <Link href="#contato">Submeter ideia</Link>
+          </Button>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
-            <H3 className="mb-4">Envie sua ideia</H3>
-            <P className="text-sm">
-              Tem uma ideia de projeto social usando tecnologia? Compartilhe conosco e
-              vamos construir juntos algo incrível para a comunidade.
-            </P>
-            <Button className="mt-6" asChild>
-              <Link href="#contato">Submeter ideia</Link>
-            </Button>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
-            <H3 className="mb-4">Projetos em Destaque</H3>
-            {projects.map((project) => (
-              <div key={project.title} className="space-y-3">
-                <h4 className="font-medium text-foreground">{project.title}</h4>
-                <P className="text-sm">{project.description}</P>
-                <div className="flex flex-wrap gap-2">
-                  {project.techs.map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-12 text-center">
-          <P className="font-medium text-foreground">
-            Junte-se a nós para construir um futuro melhor pela comunidade.
-          </P>
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+          <H3 className="mb-4">Projetos em Destaque</H3>
+          {filteredProjects.map((project) => (
+            <ProjectCard key={project.title} project={project} />
+          ))}
+          {filteredProjects.length === 0 && (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              Nenhum projeto encontrado com os filtros atuais.
+            </p>
+          )}
         </div>
       </div>
-    </section>
+
+      <div className="mt-12 text-center">
+        <P className="font-medium text-foreground">
+          Junte-se a nós para construir um futuro melhor pela comunidade.
+        </P>
+      </div>
+    </SectionTemplate>
   )
 }

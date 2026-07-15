@@ -1,6 +1,15 @@
-import { H2, P } from '@/components/atoms/typography'
+'use client'
 
-const jobs = [
+import { useState, useMemo } from 'react'
+import { SectionTemplate } from '@/components/templates/section-template'
+import { SectionHeader } from '@/components/molecules/section-header'
+import { JobCard } from '@/components/molecules/job-card'
+import { FilterBar } from '@/components/molecules/filter-bar'
+import { JobsFilterStrategy, FilterContext } from '@/lib/filters'
+import type { Job } from '@/types/job'
+import type { FilterCriteria } from '@/lib/filters'
+
+const jobs: Job[] = [
   {
     title: 'Desenvolvedor Frontend React',
     company: 'TechStart Brasil',
@@ -28,35 +37,38 @@ const jobs = [
 ]
 
 export function JobsSection() {
-  return (
-    <section id="vagas" className="border-t border-border bg-card/50 py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <H2>Vagas de Emprego</H2>
-          <P className="mt-4">
-            Oportunidades divulgadas pela comunidade. Conectamos talentos a empresas que
-            contratam.
-          </P>
-        </div>
+  const [criteria, setCriteria] = useState<FilterCriteria>({})
 
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {jobs.map((job) => (
-            <div
-              key={job.title}
-              className="flex flex-col justify-between rounded-xl border border-border bg-card p-5"
-            >
-              <div>
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                  {job.tech}
-                </span>
-                <h3 className="mt-3 font-semibold text-foreground">{job.title}</h3>
-                <P className="mt-1 text-xs">{job.company}</P>
-              </div>
-              <span className="mt-4 text-xs font-medium text-primary">{job.level}</span>
-            </div>
-          ))}
-        </div>
+  const filterContext = useMemo(() => {
+    const ctx = new FilterContext<Job>()
+    ctx.addStrategy(new JobsFilterStrategy())
+    return ctx
+  }, [])
+
+  const filteredJobs = useMemo(
+    () => filterContext.execute(jobs, criteria),
+    [criteria, filterContext],
+  )
+
+  return (
+    <SectionTemplate id="vagas">
+      <SectionHeader
+        title="Vagas de Emprego"
+        description="Oportunidades divulgadas pela comunidade. Conectamos talentos a empresas que contratam."
+      >
+        <FilterBar onFilterChange={setCriteria} showLevel />
+      </SectionHeader>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {filteredJobs.map((job) => (
+          <JobCard key={job.title} job={job} />
+        ))}
+        {filteredJobs.length === 0 && (
+          <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+            Nenhuma vaga encontrada com os filtros atuais.
+          </p>
+        )}
       </div>
-    </section>
+    </SectionTemplate>
   )
 }
