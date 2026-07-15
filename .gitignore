@@ -4,5 +4,4 @@ out
 *.log
 .env
 .env.local
-package-lock.json
 tsconfig.tsbuildinfo
