@@ -1,4 +1,5 @@
 export interface Job {
+  id?: string
   title: string
   company: string
   level: 'Júnior' | 'Pleno' | 'Sênior' | 'Especialista'
@@ -6,6 +7,7 @@ export interface Job {
 }
 
 export interface SocialProject {
+  id?: string
   title: string
   description: string
   techs: string[]

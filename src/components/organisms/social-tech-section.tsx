@@ -9,21 +9,14 @@ import { P } from '@/components/atoms/typography'
 import { H3 } from '@/components/atoms/typography'
 import { Button } from '@/components/ui/button'
 import { ProjectsFilterStrategy, FilterContext } from '@/lib/filters'
+import { useFirestoreCollection } from '@/hooks/useFirestoreCollection'
 import Link from 'next/link'
 import type { SocialProject } from '@/types/job'
 import type { FilterCriteria } from '@/lib/filters'
 
-const projects: SocialProject[] = [
-  {
-    title: 'GDG Lauro Talks',
-    description:
-      'Série de palestras e entrevistas com profissionais de tecnologia da comunidade local, abordando carreira, tendências e aprendizado.',
-    techs: ['Google Cloud', 'AI', 'Web'],
-  },
-]
-
 export function SocialTechSection() {
   const [criteria, setCriteria] = useState<FilterCriteria>({})
+  const { data: projects, loading } = useFirestoreCollection<SocialProject>('socialProjects')
 
   const filterContext = useMemo(() => {
     const ctx = new FilterContext<SocialProject>()
@@ -33,7 +26,7 @@ export function SocialTechSection() {
 
   const filteredProjects = useMemo(
     () => filterContext.execute(projects, criteria),
-    [criteria, filterContext],
+    [criteria, filterContext, projects],
   )
 
   return (
@@ -59,13 +52,21 @@ export function SocialTechSection() {
 
         <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
           <H3 className="mb-4">Projetos em Destaque</H3>
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.title} project={project} />
-          ))}
-          {filteredProjects.length === 0 && (
+          {loading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              Nenhum projeto encontrado com os filtros atuais.
+              Carregando projetos...
             </p>
+          ) : (
+            <>
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id ?? project.title} project={project} />
+              ))}
+              {filteredProjects.length === 0 && (
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  Nenhum projeto encontrado com os filtros atuais.
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
